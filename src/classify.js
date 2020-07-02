@@ -6,11 +6,15 @@ const nullData = require('./templates/nulldata');
 const pubKey = require('./templates/pubkey');
 const pubKeyHash = require('./templates/pubkeyhash');
 const scriptHash = require('./templates/scripthash');
+const vaultair = require('./templates/vaultair');
+const vaultar = require('./templates/vaultar');
 const witnessCommitment = require('./templates/witnesscommitment');
 const witnessPubKeyHash = require('./templates/witnesspubkeyhash');
 const witnessScriptHash = require('./templates/witnessscripthash');
 const types = {
   P2MS: 'multisig',
+  P2AR: 'vaultar',
+  P2AIR: 'vaultair',
   NONSTANDARD: 'nonstandard',
   NULLDATA: 'nulldata',
   P2PK: 'pubkey',
@@ -29,6 +33,8 @@ function classifyOutput(script) {
   // XXX: optimization, below functions .decompile before use
   const chunks = script_1.decompile(script);
   if (!chunks) throw new TypeError('Invalid script');
+  if (vaultar.output.check(chunks)) return types.P2AR;
+  if (vaultair.output.check(chunks)) return types.P2AIR;
   if (multisig.output.check(chunks)) return types.P2MS;
   if (pubKey.output.check(chunks)) return types.P2PK;
   if (witnessCommitment.output.check(chunks)) return types.WITNESS_COMMITMENT;
@@ -42,6 +48,8 @@ function classifyInput(script, allowIncomplete) {
   if (!chunks) throw new TypeError('Invalid script');
   if (pubKeyHash.input.check(chunks)) return types.P2PKH;
   if (scriptHash.input.check(chunks, allowIncomplete)) return types.P2SH;
+  if (vaultar.input.check(chunks, allowIncomplete)) return types.P2AR;
+  if (vaultair.input.check(chunks, allowIncomplete)) return types.P2AIR;
   if (multisig.input.check(chunks, allowIncomplete)) return types.P2MS;
   if (pubKey.input.check(chunks)) return types.P2PK;
   return types.NONSTANDARD;

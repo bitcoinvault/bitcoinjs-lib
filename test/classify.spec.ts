@@ -10,6 +10,8 @@ import * as nullData from '../src/templates/nulldata';
 import * as pubKey from '../src/templates/pubkey';
 import * as pubKeyHash from '../src/templates/pubkeyhash';
 import * as scriptHash from '../src/templates/scripthash';
+import * as vaultar from '../src/templates/vaultar';
+import * as vaultair from '../src/templates/vaultair';
 import * as witnessCommitment from '../src/templates/witnesscommitment';
 import * as witnessPubKeyHash from '../src/templates/witnesspubkeyhash';
 import * as witnessScriptHash from '../src/templates/witnessscripthash';
@@ -21,6 +23,8 @@ const tmap = {
   witnessPubKeyHash,
   witnessScriptHash,
   multisig,
+  vaultar,
+  vaultair,
   nullData,
   witnessCommitment,
 };
@@ -34,7 +38,14 @@ describe('classify', () => {
         const input = bscript.fromASM(f.input);
         const type = classify.input(input);
 
-        assert.strictEqual(type, f.type);
+        // vaultar and vaultair scriptSig for alerts are the same
+        if (
+          f.type.toLowerCase() === 'vaultair' &&
+          f.vaultTxType === 'alert' &&
+          type === 'vaultar'
+        )
+          assert(true);
+        else assert.strictEqual(type, f.type);
       });
     });
 
@@ -70,6 +81,8 @@ describe('classify', () => {
     'witnessPubKeyHash',
     'witnessScriptHash',
     'multisig',
+    'vaultar',
+    'vaultair',
     'nullData',
     'witnessCommitment',
   ].forEach(name => {
@@ -80,7 +93,16 @@ describe('classify', () => {
       fixtures.valid.forEach(f => {
         if (name.toLowerCase() === classify.types.P2WPKH) return;
         if (name.toLowerCase() === classify.types.P2WSH) return;
-        const expected = name.toLowerCase() === f.type.toLowerCase();
+
+        // vaultar and vaultair scriptSig for alerts are the same
+        const expected =
+          (name.toLowerCase() === 'vaultair' &&
+            f.type.toLowerCase() === 'vaultar' &&
+            f.vaultTxType === 'alert') ||
+          (name.toLowerCase() === 'vaultar' &&
+            f.type.toLowerCase() === 'vaultair' &&
+            f.vaultTxType === 'alert') ||
+          name.toLowerCase() === f.type.toLowerCase();
 
         if (inputType && f.input) {
           const input = bscript.fromASM(f.input);

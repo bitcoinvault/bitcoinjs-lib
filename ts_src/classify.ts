@@ -4,12 +4,16 @@ import * as nullData from './templates/nulldata';
 import * as pubKey from './templates/pubkey';
 import * as pubKeyHash from './templates/pubkeyhash';
 import * as scriptHash from './templates/scripthash';
+import * as vaultair from './templates/vaultair';
+import * as vaultar from './templates/vaultar';
 import * as witnessCommitment from './templates/witnesscommitment';
 import * as witnessPubKeyHash from './templates/witnesspubkeyhash';
 import * as witnessScriptHash from './templates/witnessscripthash';
 
 const types = {
   P2MS: 'multisig' as string,
+  P2AR: 'vaultar' as string,
+  P2AIR: 'vaultair' as string,
   NONSTANDARD: 'nonstandard' as string,
   NULLDATA: 'nulldata' as string,
   P2PK: 'pubkey' as string,
@@ -30,6 +34,8 @@ function classifyOutput(script: Buffer): string {
   const chunks = decompile(script);
   if (!chunks) throw new TypeError('Invalid script');
 
+  if (vaultar.output.check(chunks)) return types.P2AR;
+  if (vaultair.output.check(chunks)) return types.P2AIR;
   if (multisig.output.check(chunks)) return types.P2MS;
   if (pubKey.output.check(chunks)) return types.P2PK;
   if (witnessCommitment.output.check(chunks)) return types.WITNESS_COMMITMENT;
@@ -45,6 +51,8 @@ function classifyInput(script: Buffer, allowIncomplete?: boolean): string {
 
   if (pubKeyHash.input.check(chunks)) return types.P2PKH;
   if (scriptHash.input.check(chunks, allowIncomplete)) return types.P2SH;
+  if (vaultar.input.check(chunks, allowIncomplete)) return types.P2AR;
+  if (vaultair.input.check(chunks, allowIncomplete)) return types.P2AIR;
   if (multisig.input.check(chunks, allowIncomplete)) return types.P2MS;
   if (pubKey.input.check(chunks)) return types.P2PK;
 

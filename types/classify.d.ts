@@ -1,5 +1,7 @@
 declare const types: {
     P2MS: string;
+    P2AR: string;
+    P2AIR: string;
     NONSTANDARD: string;
     NULLDATA: string;
     P2PK: string;
