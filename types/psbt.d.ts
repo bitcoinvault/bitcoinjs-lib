@@ -2,6 +2,7 @@ import { Psbt as PsbtBase } from 'bip174';
 import { KeyValue, PsbtGlobalUpdate, PsbtInput, PsbtInputUpdate, PsbtOutput, PsbtOutputUpdate, TransactionInput } from 'bip174/src/lib/interfaces';
 import { Signer, SignerAsync } from './ecpair';
 import { Network } from './networks';
+import * as payments from './payments';
 import { Transaction } from './transaction';
 /**
  * Psbt class can parse and generate a PSBT binary based off of the BIP174.
@@ -57,8 +58,10 @@ export declare class Psbt {
     extractTransaction(disableFeeCheck?: boolean): Transaction;
     getFeeRate(): number;
     getFee(): number;
-    finalizeAllInputs(): this;
-    finalizeInput(inputIndex: number): this;
+    finalizeAllInputs(vaultTxType?: payments.VaultTxType): this;
+    finalizeAllInputsAsAlert(): this;
+    finalizeAllInputsAsRecovery(): this;
+    finalizeInput(inputIndex: number, vaultTxType?: payments.VaultTxType): this;
     validateSignaturesOfAllInputs(): boolean;
     validateSignaturesOfInput(inputIndex: number, pubkey?: Buffer): boolean;
     signAllInputsHD(hdKeyPair: HDSigner, sighashTypes?: number[]): this;

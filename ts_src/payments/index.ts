@@ -12,6 +12,7 @@ export enum VaultTxType {
   Alert,
   Instant,
   Recovery,
+  NonVault,
 }
 
 export interface Payment {

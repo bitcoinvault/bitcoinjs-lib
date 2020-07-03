@@ -10,7 +10,8 @@ import { p2wsh } from './p2wsh';
 export declare enum VaultTxType {
     Alert = 0,
     Instant = 1,
-    Recovery = 2
+    Recovery = 2,
+    NonVault = 3
 }
 export interface Payment {
     name?: string;

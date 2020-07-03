@@ -21,6 +21,7 @@ var VaultTxType;
   VaultTxType[(VaultTxType['Alert'] = 0)] = 'Alert';
   VaultTxType[(VaultTxType['Instant'] = 1)] = 'Instant';
   VaultTxType[(VaultTxType['Recovery'] = 2)] = 'Recovery';
+  VaultTxType[(VaultTxType['NonVault'] = 3)] = 'NonVault';
 })((VaultTxType = exports.VaultTxType || (exports.VaultTxType = {})));
 // TODO
 // witness commitment
