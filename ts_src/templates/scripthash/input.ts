@@ -4,6 +4,8 @@ import * as bscript from '../../script';
 import * as p2ms from '../multisig';
 import * as p2pk from '../pubkey';
 import * as p2pkh from '../pubkeyhash';
+import * as p2air from '../vaultair';
+import * as p2ar from '../vaultar';
 import * as p2wpkho from '../witnesspubkeyhash/output';
 import * as p2wsho from '../witnessscripthash/output';
 
@@ -39,6 +41,18 @@ export function check(
   if (
     p2pkh.input.check(scriptSigChunks) &&
     p2pkh.output.check(redeemScriptChunks)
+  )
+    return true;
+
+  if (
+    p2air.input.check(scriptSigChunks, allowIncomplete) &&
+    p2air.output.check(redeemScriptChunks)
+  )
+    return true;
+
+  if (
+    p2ar.input.check(scriptSigChunks, allowIncomplete) &&
+    p2ar.output.check(redeemScriptChunks)
   )
     return true;
 

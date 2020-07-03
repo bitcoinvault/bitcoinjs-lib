@@ -5,6 +5,8 @@ const bscript = require('../../script');
 const p2ms = require('../multisig');
 const p2pk = require('../pubkey');
 const p2pkh = require('../pubkeyhash');
+const p2air = require('../vaultair');
+const p2ar = require('../vaultar');
 const p2wpkho = require('../witnesspubkeyhash/output');
 const p2wsho = require('../witnessscripthash/output');
 function check(script, allowIncomplete) {
@@ -30,6 +32,16 @@ function check(script, allowIncomplete) {
   if (
     p2pkh.input.check(scriptSigChunks) &&
     p2pkh.output.check(redeemScriptChunks)
+  )
+    return true;
+  if (
+    p2air.input.check(scriptSigChunks, allowIncomplete) &&
+    p2air.output.check(redeemScriptChunks)
+  )
+    return true;
+  if (
+    p2ar.input.check(scriptSigChunks, allowIncomplete) &&
+    p2ar.output.check(redeemScriptChunks)
   )
     return true;
   if (
