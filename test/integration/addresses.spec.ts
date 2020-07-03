@@ -2,8 +2,10 @@ import * as assert from 'assert';
 import { describe, it } from 'mocha';
 import * as bitcoin from '../..';
 import { regtestUtils } from './_regtest';
+import * as commons from '../common.utils';
 const dhttp = regtestUtils.dhttp;
 const TESTNET = bitcoin.networks.testnet;
+const NETWORKS = commons.NETWORKS;
 
 describe('bitcoinjs-lib (addresses)', () => {
   it(
@@ -118,24 +120,91 @@ describe('bitcoinjs-lib (addresses)', () => {
 
   it('can generate a Litecoin address', () => {
     // WARNING: although possible, bitcoinjs is NOT necessarily compatible with Litecoin
-    const LITECOIN = {
-      messagePrefix: '\x19Litecoin Signed Message:\n',
-      bech32: 'ltc',
-      bip32: {
-        public: 0x019da462,
-        private: 0x019d9cfe,
-      },
-      pubKeyHash: 0x30,
-      scriptHash: 0x32,
-      wif: 0xb0,
-    };
-
-    const keyPair = bitcoin.ECPair.makeRandom({ network: LITECOIN });
+    const keyPair = bitcoin.ECPair.makeRandom({
+      network: NETWORKS.litecoin,
+    });
     const { address } = bitcoin.payments.p2pkh({
       pubkey: keyPair.publicKey,
-      network: LITECOIN,
+      network: NETWORKS.litecoin,
     });
 
     assert.strictEqual(address!.startsWith('L'), true);
+  });
+
+  it('can generate a BitcoinVault address', () => {
+    const keyPair = bitcoin.ECPair.makeRandom({
+      network: NETWORKS.bitcoinvault,
+    });
+    const { address } = bitcoin.payments.p2pkh({
+      pubkey: keyPair.publicKey,
+      network: NETWORKS.bitcoinvault,
+    });
+
+    assert.strictEqual(address!.startsWith('Y'), true);
+  });
+
+  it('can generate a P2SH, pay-to-vaultar address', () => {
+    const pubkeys = [
+      '026477115981fe981a6918a6297d9803c4dc04f328f22041bedff886bbc2962e01',
+      '02c96db2302d19b43d4c69368babace7854cc84eb9e061cde51cfa77ca4a22b8b9',
+    ].map(hex => Buffer.from(hex, 'hex'));
+
+    const p2ar = bitcoin.payments.p2ar({
+      pubkeys,
+      network: NETWORKS.bitcoinvault,
+    });
+
+    const { address } = bitcoin.payments.p2sh({
+      redeem: p2ar,
+      network: NETWORKS.bitcoinvault,
+    });
+
+    assert.strictEqual(address, 'RUSpAaQEfDQ9WD4y7pJPddovWvk8wXLq3K');
+  });
+
+  it('can generate a P2WSH (SegWit), pay-to-vaultar address', () => {
+    const pubkeys = [
+      '026477115981fe981a6918a6297d9803c4dc04f328f22041bedff886bbc2962e01',
+      '02c96db2302d19b43d4c69368babace7854cc84eb9e061cde51cfa77ca4a22b8b9',
+    ].map(hex => Buffer.from(hex, 'hex'));
+
+    const p2ar = bitcoin.payments.p2ar({
+      pubkeys,
+      network: NETWORKS.bitcoinvault,
+    });
+
+    const { address } = bitcoin.payments.p2wsh({
+      redeem: p2ar,
+      network: NETWORKS.bitcoinvault,
+    });
+
+    assert.strictEqual(
+      address,
+      'royale1q5zxlxqkxuqmxjcvnfkq0zj5uhcuaet9yps34y6vm3h4nr2m6vl3swcj8gc',
+    );
+  });
+
+  it('can generate a P2SH(P2WSH(...)), pay-to-vaultar address', () => {
+    const pubkeys = [
+      '026477115981fe981a6918a6297d9803c4dc04f328f22041bedff886bbc2962e01',
+      '02c96db2302d19b43d4c69368babace7854cc84eb9e061cde51cfa77ca4a22b8b9',
+    ].map(hex => Buffer.from(hex, 'hex'));
+
+    const p2ar = bitcoin.payments.p2ar({
+      pubkeys,
+      network: NETWORKS.bitcoinvault,
+    });
+
+    const p2wsh = bitcoin.payments.p2wsh({
+      redeem: p2ar,
+      network: NETWORKS.bitcoinvault,
+    });
+
+    const { address } = bitcoin.payments.p2sh({
+      redeem: p2wsh,
+      network: NETWORKS.bitcoinvault,
+    });
+
+    assert.strictEqual(address, 'RAvTdya1WTiRyEJWiuGDX4bPCa61XdHSbV');
   });
 });
