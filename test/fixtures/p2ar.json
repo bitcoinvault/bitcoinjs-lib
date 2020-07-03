@@ -1,0 +1,370 @@
+{
+  "valid": [
+    {
+      "description": "output from alert output",
+      "arguments": {
+        "vaultTxType": 0,
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG"
+      },
+      "options": {},
+      "expected": {
+        "m": 1,
+        "n": 2,
+        "name": "p2ar(Alert)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": null,
+        "input": null,
+        "witness": null,
+        "vaultTxType": 0
+      }
+    },
+    {
+      "description": "output from recovery output",
+      "arguments": {
+        "vaultTxType": 2,
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG"
+      },
+      "options": {},
+      "expected": {
+        "m": 2,
+        "n": 2,
+        "name": "p2ar(Recovery)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": null,
+        "input": null,
+        "witness": null,
+        "vaultTxType": 2
+      }
+    },
+    {
+      "description": "output from 2 pubkeys",
+      "arguments": {
+        "vaultTxType": 0,
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ]
+      },
+      "expected": {
+        "m": 1,
+        "n": 2,
+        "name": "p2ar(Alert)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": null,
+        "input": null,
+        "witness": null,
+        "vaultTxType": 0
+      }
+    },
+    {
+      "description": "input/output from alert/pubkeys/signatures",
+      "arguments": {
+        "vaultTxType": 0,
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          "300602010002010001"
+        ]
+      },
+      "expected": {
+        "m": 1,
+        "n": 2,
+        "vaultTxType": 0,
+        "name": "p2ar(Alert)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          "300602010002010001"
+        ],
+        "input": "OP_0 300602010002010001 OP_1",
+        "witness": []
+      }
+    },
+    {
+      "description": "input/output from recovery/pubkeys/signatures",
+      "arguments": {
+        "vaultTxType": 2,
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          "300602010002010001",
+          "300602010102010001"
+        ]
+      },
+      "expected": {
+        "m": 2,
+        "n": 2,
+        "vaultTxType": 2,
+        "name": "p2ar(Recovery)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          "300602010002010001",
+          "300602010102010001"
+        ],
+        "input": "OP_0 300602010002010001 300602010102010001 OP_0",
+        "witness": []
+      }
+    },
+    {
+      "description": "input/output from output/signatures",
+      "arguments": {
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "signatures": [
+          "300602010002010001"
+        ]
+      },
+      "expected": {
+        "m": 1,
+        "n": 2,
+        "name": "p2ar(Alert)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          "300602010002010001"
+        ],
+        "input": "OP_0 300602010002010001 OP_1",
+        "witness": []
+      }
+    },
+    {
+      "description": "input/output from input/output",
+      "arguments": {
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "input": "OP_0 300602010002010001 OP_1"
+      },
+      "expected": {
+        "m": 1,
+        "n": 2,
+        "name": "p2ar(Alert)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          "300602010002010001"
+        ],
+        "input": "OP_0 300602010002010001 OP_1",
+        "witness": []
+      }
+    },
+    {
+      "description": "input/output from input/output, even if incomplete",
+      "arguments": {
+        "vaultTxType": 2,
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "input": "OP_0 OP_0 300602010102010001 OP_0"
+      },
+      "options": {
+        "allowIncomplete": true
+      },
+      "expected": {
+        "m": 2,
+        "n": 2,
+        "name": "p2ar(Recovery)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          0,
+          "300602010102010001"
+        ],
+        "input": "OP_0 OP_0 300602010102010001 OP_0",
+        "witness": [],
+        "vaultTxType": 2
+      }
+    },
+    {
+      "description": "input/output from output/signatures, even if incomplete",
+      "arguments": {
+        "vaultTxType": 2,
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "signatures": [
+          0,
+          "300602010102010001"
+        ]
+      },
+      "options": {
+        "allowIncomplete": true
+      },
+      "expected": {
+        "m": 2,
+        "n": 2,
+        "name": "p2ar(Recovery)",
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          0,
+          "300602010102010001"
+        ],
+        "input": "OP_0 OP_0 300602010102010001 OP_0",
+        "witness": []
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "exception": "Not enough data",
+      "arguments": {}
+    },
+    {
+      "exception": "Not enough data",
+      "arguments": {
+        "vaultTxType": 0
+      }
+    },
+    {
+      "description": "Non OP_INT chunk (m)",
+      "exception": "Output is invalid",
+      "arguments": {
+        "output": "OP_RESERVED"
+      }
+    },
+    {
+      "description": "Missing OP_CHECKMULTISIG",
+      "exception": "Output is invalid",
+      "arguments": {
+        "output": "OP_1 OP_2 OP_RESERVED"
+      }
+    },
+    {
+      "description": "Missing if/else statement",
+      "exception": "Output is invalid",
+      "arguments": {
+        "output": "OP_0 OP_2 OP_CHECKMULTISIG"
+      }
+    },
+    {
+      "description": "Incorrect if/else statement",
+      "exception": "Output is invalid",
+      "arguments": {
+        "output": "OP_IF OP_2 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG"
+      }
+    },
+    {
+      "description": "Missing pubkeys",
+      "exception": "Output is invalid",
+      "arguments": {
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF OP_2 OP_CHECKMULTISIG"
+      }
+    },
+    {
+      "exception": "Pubkeys mismatch",
+      "options": {},
+      "arguments": {
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000003 OP_2 OP_CHECKMULTISIG"
+      }
+    },
+    {
+      "exception": "Not enough or too many signatures provided",
+      "arguments": {
+        "vaultTxType": 0,
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000001"
+        ],
+        "signatures": [
+          "300602010002010001",
+          "300602010002010001"
+        ]
+      }
+    },
+    {
+      "exception": "Not enough or too many signatures provided",
+      "arguments": {
+        "vaultTxType": 2,
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000001"
+        ],
+        "signatures": [
+          "300602010002010001"
+        ]
+      }
+    },
+    {
+      "description": "Missing OP_0 and alert flag",
+      "exception": "Input is invalid",
+      "options": {},
+      "arguments": {
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000001"
+        ],
+        "input": "OP_RESERVED"
+      }
+    },
+    {
+      "description": "Input has invalid signature",
+      "exception": "Input is invalid",
+      "arguments": {
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000001"
+        ],
+        "input": "OP_0 ffffffffffffffff OP_1"
+      }
+    }
+  ],
+  "dynamic": {
+    "depends": {
+      "output": [ "output", [ "m", "pubkeys" ] ],
+      "pubkeys": [ "output" ],
+      "signatures": [ ["input", "output"] ],
+      "input": [ ["signatures", "output"] ],
+      "witness": [ ["input", "output"] ]
+    },
+    "details": [
+      {
+        "description": "p2ar",
+        "m": 1,
+        "n": 2,
+        "output": "OP_IF OP_1 OP_ELSE OP_2 OP_ENDIF 030000000000000000000000000000000000000000000000000000000000000001 030000000000000000000000000000000000000000000000000000000000000002 OP_2 OP_CHECKMULTISIG",
+        "pubkeys": [
+          "030000000000000000000000000000000000000000000000000000000000000001",
+          "030000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "signatures": [
+          "300602010002010001"
+        ],
+        "input": "OP_0 300602010002010001 OP_1",
+        "witness": []
+      }
+    ]
+  }
+}
