@@ -6,6 +6,8 @@ const typeforce = require('typeforce');
 import * as p2ms from '../multisig';
 import * as p2pk from '../pubkey';
 import * as p2pkh from '../pubkeyhash';
+import * as p2air from '../vaultair';
+import * as p2ar from '../vaultar';
 
 export function check(chunks: Buffer[], allowIncomplete?: boolean): boolean {
   typeforce(typeforce.Array, chunks);
@@ -25,6 +27,18 @@ export function check(chunks: Buffer[], allowIncomplete?: boolean): boolean {
   if (
     p2pkh.input.check(witnessRawScriptSig) &&
     p2pkh.output.check(witnessScriptChunks)
+  )
+    return true;
+
+  if (
+    p2air.input.check(witnessRawScriptSig) &&
+    p2air.output.check(witnessScriptChunks)
+  )
+    return true;
+
+  if (
+    p2ar.input.check(witnessRawScriptSig) &&
+    p2ar.output.check(witnessScriptChunks)
   )
     return true;
 

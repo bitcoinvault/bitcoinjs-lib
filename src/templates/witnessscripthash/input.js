@@ -6,6 +6,8 @@ const typeforce = require('typeforce');
 const p2ms = require('../multisig');
 const p2pk = require('../pubkey');
 const p2pkh = require('../pubkeyhash');
+const p2air = require('../vaultair');
+const p2ar = require('../vaultar');
 function check(chunks, allowIncomplete) {
   typeforce(typeforce.Array, chunks);
   if (chunks.length < 1) return false;
@@ -19,6 +21,16 @@ function check(chunks, allowIncomplete) {
   if (
     p2pkh.input.check(witnessRawScriptSig) &&
     p2pkh.output.check(witnessScriptChunks)
+  )
+    return true;
+  if (
+    p2air.input.check(witnessRawScriptSig) &&
+    p2air.output.check(witnessScriptChunks)
+  )
+    return true;
+  if (
+    p2ar.input.check(witnessRawScriptSig) &&
+    p2ar.output.check(witnessScriptChunks)
   )
     return true;
   if (
