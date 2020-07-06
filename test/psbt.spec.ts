@@ -442,6 +442,58 @@ describe(`Psbt`, () => {
     });
   });
 
+  describe('finalizeAllInputsAsAlert', () => {
+    fixtures.finalizeAllInputsAsAlert.forEach(f => {
+      it(`Finalizes inputs of type "${f.type}"`, () => {
+        const psbt = Psbt.fromBase64(f.psbt);
+
+        psbt.finalizeAllInputsAsAlert();
+
+        assert.strictEqual(psbt.toBase64(), f.result);
+      });
+    });
+    it('fails if no script found', () => {
+      const psbt = new Psbt();
+      psbt.addInput({
+        hash:
+          '0000000000000000000000000000000000000000000000000000000000000000',
+        index: 0,
+      });
+      assert.throws(() => {
+        psbt.finalizeAllInputs();
+      }, new RegExp('No script found for input #0'));
+      psbt.updateInput(0, {
+        witnessUtxo: {
+          script: Buffer.from(
+            '0014d85c2b71d0060b09c9886aeb815e50991dda124d',
+            'hex',
+          ),
+          value: 2e5,
+        },
+      });
+      assert.throws(() => {
+        psbt.finalizeAllInputs();
+      }, new RegExp('Can not finalize input #0'));
+    });
+  });
+
+  describe('finalizeAllInputsAsRecovery', () => {
+    fixtures.finalizeAllInputsAsRecovery.forEach(f => {
+      it(`Finalizes inputs of type "${f.type}"`, () => {
+        const psbt = Psbt.fromBase64(f.psbt);
+
+        const keyPair = ECPair.fromPrivateKey(
+          Buffer.from(f.recoveryPrivKey, 'hex'),
+        );
+        psbt.signInput(0, keyPair);
+
+        psbt.finalizeAllInputsAsRecovery();
+
+        assert.strictEqual(psbt.toBase64(), f.result);
+      });
+    });
+  });
+
   describe('addInput', () => {
     fixtures.addInput.checks.forEach(f => {
       it(f.description, () => {
