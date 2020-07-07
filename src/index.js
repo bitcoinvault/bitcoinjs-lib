@@ -26,3 +26,5 @@ var transaction_1 = require('./transaction');
 exports.Transaction = transaction_1.Transaction;
 var transaction_builder_1 = require('./transaction_builder');
 exports.TransactionBuilder = transaction_builder_1.TransactionBuilder;
+var payments_1 = require('./payments');
+exports.VaultTxType = payments_1.VaultTxType;
