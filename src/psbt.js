@@ -209,6 +209,9 @@ class Psbt {
   finalizeAllInputsAsAlert() {
     return this.finalizeAllInputs(payments.VaultTxType.Alert);
   }
+  finalizeAllInputsAsInstant() {
+    return this.finalizeAllInputs(payments.VaultTxType.Instant);
+  }
   finalizeAllInputsAsRecovery() {
     return this.finalizeAllInputs(payments.VaultTxType.Recovery);
   }
@@ -575,6 +578,9 @@ function canFinalize(input, script, scriptType, vaultTxType) {
     case 'pubkeyhash':
     case 'witnesspubkeyhash':
       return hasSigs(1, input.partialSig);
+    case 'vaultair':
+      const p2air = payments.p2air({ output: script, vaultTxType });
+      return hasSigs(p2air.m, input.partialSig);
     case 'vaultar':
       const p2ar = payments.p2ar({ output: script, vaultTxType });
       return hasSigs(p2ar.m, input.partialSig);
@@ -603,6 +609,7 @@ function isPaymentFactory(payment) {
     }
   };
 }
+const isP2AIR = isPaymentFactory(payments.p2air);
 const isP2AR = isPaymentFactory(payments.p2ar);
 const isP2MS = isPaymentFactory(payments.p2ms);
 const isP2PK = isPaymentFactory(payments.p2pk);
@@ -925,6 +932,13 @@ function getPayment(script, scriptType, partialSig, vaultTxType) {
         signatures: getSortedSigs(script, partialSig, scriptType, vaultTxType),
       });
       break;
+    case 'vaultair':
+      payment = payments.p2air({
+        vaultTxType,
+        output: script,
+        signatures: getSortedSigs(script, partialSig, scriptType, vaultTxType),
+      });
+      break;
     case 'vaultar':
       payment = payments.p2ar({
         vaultTxType,
@@ -1032,6 +1046,9 @@ function getSignersFromHD(inputIndex, inputs, hdKeyPair) {
 function getSortedSigs(script, partialSig, scriptType, vaultTxType) {
   let p2s;
   switch (scriptType) {
+    case 'vaultair':
+      p2s = payments.p2air({ output: script, vaultTxType });
+      break;
     case 'vaultar':
       p2s = payments.p2ar({ output: script, vaultTxType });
       break;
@@ -1180,6 +1197,7 @@ function nonWitnessUtxoTxFromCache(cache, input, inputIndex) {
 function classifyScript(script) {
   if (isP2WPKH(script)) return 'witnesspubkeyhash';
   if (isP2PKH(script)) return 'pubkeyhash';
+  if (isP2AIR(script)) return 'vaultair';
   if (isP2AR(script)) return 'vaultar';
   if (isP2MS(script)) return 'multisig';
   if (isP2PK(script)) return 'pubkey';

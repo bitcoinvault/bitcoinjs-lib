@@ -60,6 +60,7 @@ export declare class Psbt {
     getFee(): number;
     finalizeAllInputs(vaultTxType?: payments.VaultTxType): this;
     finalizeAllInputsAsAlert(): this;
+    finalizeAllInputsAsInstant(): this;
     finalizeAllInputsAsRecovery(): this;
     finalizeInput(inputIndex: number, vaultTxType?: payments.VaultTxType): this;
     validateSignaturesOfAllInputs(): boolean;

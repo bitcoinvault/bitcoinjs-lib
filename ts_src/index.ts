@@ -33,7 +33,7 @@ export {
   PaymentOpts,
   Stack,
   StackElement,
-  VaultTxType
+  VaultTxType,
 } from './payments';
 export { OpCode } from './script';
 export { Input as TxInput, Output as TxOutput } from './transaction';
