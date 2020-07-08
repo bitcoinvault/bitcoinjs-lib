@@ -1,5 +1,6 @@
 import { Network } from '../networks';
 import { p2data as embed } from './embed';
+import { p2air } from './p2air';
 import { p2ar } from './p2ar';
 import { p2ms } from './p2ms';
 import { p2pk } from './p2pk';
@@ -47,7 +48,7 @@ export type StackElement = Buffer | number;
 export type Stack = StackElement[];
 export type StackFunction = () => Stack;
 
-export { embed, p2ar, p2ms, p2pk, p2pkh, p2sh, p2wpkh, p2wsh };
+export { embed, p2air, p2ar, p2ms, p2pk, p2pkh, p2sh, p2wpkh, p2wsh };
 
 // TODO
 // witness commitment
