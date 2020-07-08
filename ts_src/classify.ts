@@ -11,17 +11,17 @@ import * as witnessPubKeyHash from './templates/witnesspubkeyhash';
 import * as witnessScriptHash from './templates/witnessscripthash';
 
 const types = {
-  P2MS: 'multisig' as string,
-  P2AR: 'vaultar' as string,
-  P2AIR: 'vaultair' as string,
-  NONSTANDARD: 'nonstandard' as string,
-  NULLDATA: 'nulldata' as string,
-  P2PK: 'pubkey' as string,
-  P2PKH: 'pubkeyhash' as string,
-  P2SH: 'scripthash' as string,
-  P2WPKH: 'witnesspubkeyhash' as string,
-  P2WSH: 'witnessscripthash' as string,
-  WITNESS_COMMITMENT: 'witnesscommitment' as string,
+  P2MS: 'multisig',
+  P2AR: 'vaultar',
+  P2AIR: 'vaultair',
+  NONSTANDARD: 'nonstandard',
+  NULLDATA: 'nulldata',
+  P2PK: 'pubkey',
+  P2PKH: 'pubkeyhash',
+  P2SH: 'scripthash',
+  P2WPKH: 'witnesspubkeyhash',
+  P2WSH: 'witnessscripthash',
+  WITNESS_COMMITMENT: 'witnesscommitment',
 };
 
 function classifyOutput(script: Buffer): string {

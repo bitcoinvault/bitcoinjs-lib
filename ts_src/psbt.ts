@@ -1335,7 +1335,6 @@ function getSortedSigs(
       break;
     default:
       p2s = payments.p2ms({ output: script });
-      break;
   }
 
   // for each pubkey in order of p2ms script

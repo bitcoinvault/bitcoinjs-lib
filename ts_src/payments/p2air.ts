@@ -28,10 +28,10 @@ export function p2air(a: Payment, opts?: PaymentOpts): Payment {
   opts = Object.assign({ validate: true }, opts || {});
 
   function isAcceptableSignature(x: Buffer | number): boolean {
-    return (
-      bscript.isCanonicalScriptSignature(x as Buffer) ||
-      (opts!.allowIncomplete && (x as number) === OPS.OP_0) !== undefined
-    );
+    if (typeof x === 'number') {
+      return (opts!.allowIncomplete && x === OPS.OP_0) !== undefined;
+    }
+    return bscript.isCanonicalScriptSignature(x);
   }
 
   typef(
@@ -124,7 +124,7 @@ export function p2air(a: Payment, opts?: PaymentOpts): Payment {
     return [];
   });
   lazy.prop(o, 'name', () => {
-    return `p2air(${VaultTxType[o.vaultTxType as VaultTxType]})`;
+    return `p2air(${VaultTxType[o.vaultTxType!]})`;
   });
   lazy.prop(o, 'vaultTxType', () => {
     o.vaultTxType = a.vaultTxType;

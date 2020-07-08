@@ -23,10 +23,10 @@ function p2ar(a, opts) {
   if (a.vaultTxType === undefined) a.vaultTxType = index_1.VaultTxType.Alert;
   opts = Object.assign({ validate: true }, opts || {});
   function isAcceptableSignature(x) {
-    return (
-      bscript.isCanonicalScriptSignature(x) ||
-      (opts.allowIncomplete && x === OPS.OP_0) !== undefined
-    );
+    if (typeof x === 'number') {
+      return (opts.allowIncomplete && x === OPS.OP_0) !== undefined;
+    }
+    return bscript.isCanonicalScriptSignature(x);
   }
   typef(
     {
