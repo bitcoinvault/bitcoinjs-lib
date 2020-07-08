@@ -477,6 +477,23 @@ describe(`Psbt`, () => {
     });
   });
 
+  describe('finalizeAllInputsAsInstant', () => {
+    fixtures.finalizeAllInputsAsInstant.forEach(f => {
+      it(`Finalizes inputs of type "${f.type}"`, () => {
+        const psbt = Psbt.fromBase64(f.psbt);
+
+        const keyPair = ECPair.fromPrivateKey(
+          Buffer.from(f.instantPrivKey, 'hex'),
+        );
+        psbt.signInput(0, keyPair);
+
+        psbt.finalizeAllInputsAsInstant();
+
+        assert.strictEqual(psbt.toBase64(), f.result);
+      });
+    });
+  });
+
   describe('finalizeAllInputsAsRecovery', () => {
     fixtures.finalizeAllInputsAsRecovery.forEach(f => {
       it(`Finalizes inputs of type "${f.type}"`, () => {
