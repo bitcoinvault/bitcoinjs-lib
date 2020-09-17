@@ -6,7 +6,7 @@ import { Signer } from './ecpair';
 import * as ECPair from './ecpair';
 import { Network } from './networks';
 import * as networks from './networks';
-import { Payment } from './payments';
+import { Payment, VaultTxType } from './payments';
 import * as payments from './payments';
 import * as bscript from './script';
 import { OPS as ops } from './script';
@@ -21,19 +21,27 @@ const PREVOUT_TYPES: Set<string> = new Set([
   'p2pkh',
   'p2pk',
   'p2wpkh',
+  'p2ar',
+  'p2air',
   'p2ms',
   // P2SH wrapped
   'p2sh-p2pkh',
   'p2sh-p2pk',
   'p2sh-p2wpkh',
+  'p2sh-p2ar',
+  'p2sh-p2air',
   'p2sh-p2ms',
   // P2WSH wrapped
   'p2wsh-p2pkh',
   'p2wsh-p2pk',
+  'p2wsh-p2ar',
+  'p2wsh-p2air',
   'p2wsh-p2ms',
   // P2SH-P2WSH wrapper
   'p2sh-p2wsh-p2pkh',
   'p2sh-p2wsh-p2pk',
+  'p2sh-p2wsh-p2ar',
+  'p2sh-p2wsh-p2air',
   'p2sh-p2wsh-p2ms',
 ]);
 
@@ -62,6 +70,7 @@ interface TxbInput {
   sequence?: number;
   scriptSig?: TxbScript;
   maxSignatures?: number;
+  vaultTxType?: payments.VaultTxType;
 }
 
 interface TxbOutput {
@@ -79,6 +88,7 @@ interface TxbSignArg {
   hashType?: number;
   witnessValue?: number;
   witnessScript?: Buffer;
+  vaultTxType?: payments.VaultTxType;
 }
 
 function tfMessage(type: any, value: any, message: string): void {
@@ -101,6 +111,7 @@ export class TransactionBuilder {
   static fromTransaction(
     transaction: Transaction,
     network?: Network,
+    vaultTxType?: payments.VaultTxType,
   ): TransactionBuilder {
     const txb = new TransactionBuilder(network);
 
@@ -119,6 +130,7 @@ export class TransactionBuilder {
         sequence: txIn.sequence,
         script: txIn.script,
         witness: txIn.witness,
+        vaultTxType,
       });
     });
 
@@ -193,6 +205,7 @@ export class TransactionBuilder {
     vout: number,
     sequence?: number,
     prevOutScript?: Buffer,
+    vaultTxType?: payments.VaultTxType,
   ): number {
     if (!this.__canModifyInputs()) {
       throw new Error('No, this would invalidate signatures');
@@ -218,6 +231,7 @@ export class TransactionBuilder {
       sequence,
       prevOutScript,
       value,
+      vaultTxType,
     });
   }
 
@@ -284,7 +298,13 @@ export class TransactionBuilder {
 
     // derive what we can from the scriptSig
     if (options.script !== undefined) {
-      input = expandInput(options.script, options.witness || []);
+      input = expandInput(
+        options.script,
+        options.witness || [],
+        undefined,
+        undefined,
+        options.vaultTxType,
+      );
     }
 
     // if an input value was given, retain it
@@ -309,6 +329,8 @@ export class TransactionBuilder {
       input.prevOutScript = options.prevOutScript;
       input.prevOutType = prevOutType || classify.output(options.prevOutScript);
     }
+
+    input.vaultTxType = options.vaultTxType;
 
     const vin = this.__TX.addInput(
       txHash,
@@ -439,6 +461,7 @@ function expandInput(
   witnessStack: Buffer[],
   type?: string,
   scriptPubKey?: Buffer,
+  vaultTxType?: payments.VaultTxType,
 ): TxbInput {
   if (scriptSig.length === 0 && witnessStack.length === 0) return {};
   if (!type) {
@@ -486,6 +509,44 @@ function expandInput(
       };
     }
 
+    case SCRIPT_TYPES.P2AR: {
+      const { pubkeys, signatures } = payments.p2ar(
+        {
+          input: scriptSig,
+          output: scriptPubKey,
+          vaultTxType,
+        },
+        { allowIncomplete: true },
+      );
+
+      return {
+        prevOutType: SCRIPT_TYPES.P2AR,
+        pubkeys,
+        signatures,
+        maxSignatures: 2,
+        vaultTxType,
+      };
+    }
+
+    case SCRIPT_TYPES.P2AIR: {
+      const { pubkeys, signatures } = payments.p2air(
+        {
+          input: scriptSig,
+          output: scriptPubKey,
+          vaultTxType,
+        },
+        { allowIncomplete: true },
+      );
+
+      return {
+        prevOutType: SCRIPT_TYPES.P2AIR,
+        pubkeys,
+        signatures,
+        maxSignatures: 3,
+        vaultTxType,
+      };
+    }
+
     case SCRIPT_TYPES.P2MS: {
       const { m, pubkeys, signatures } = payments.p2ms(
         {
@@ -516,6 +577,7 @@ function expandInput(
       redeem!.witness!,
       outputType,
       redeem!.output,
+      vaultTxType,
     );
     if (!expanded.prevOutType) return {};
 
@@ -540,13 +602,20 @@ function expandInput(
     const outputType = classify.output(redeem!.output!);
     let expanded;
     if (outputType === SCRIPT_TYPES.P2WPKH) {
-      expanded = expandInput(redeem!.input!, redeem!.witness!, outputType);
+      expanded = expandInput(
+        redeem!.input!,
+        redeem!.witness!,
+        outputType,
+        undefined,
+        vaultTxType,
+      );
     } else {
       expanded = expandInput(
         bscript.compile(redeem!.witness!),
         [],
         outputType,
         redeem!.output,
+        vaultTxType,
       );
     }
     if (!expanded.prevOutType) return {};
@@ -574,8 +643,11 @@ function fixMultisigOrder(
   transaction: Transaction,
   vin: number,
 ): void {
-  if (input.redeemScriptType !== SCRIPT_TYPES.P2MS || !input.redeemScript)
-    return;
+  const isCorrectType =
+    input.redeemScriptType === SCRIPT_TYPES.P2AR ||
+    input.redeemScriptType === SCRIPT_TYPES.P2AIR ||
+    input.redeemScriptType === SCRIPT_TYPES.P2MS;
+  if (!isCorrectType || !input.redeemScript) return;
   if (input.pubkeys!.length === input.signatures!.length) return;
 
   const unmatched = input.signatures!.concat();
@@ -655,6 +727,26 @@ function expandOutput(script: Buffer, ourPubKey?: Buffer): TxbOutput {
       };
     }
 
+    case SCRIPT_TYPES.P2AR: {
+      const p2ar = payments.p2ar({ output: script });
+      return {
+        type,
+        pubkeys: p2ar.pubkeys,
+        signatures: p2ar.pubkeys!.map((): undefined => undefined),
+        maxSignatures: 2,
+      };
+    }
+
+    case SCRIPT_TYPES.P2AIR: {
+      const p2air = payments.p2air({ output: script });
+      return {
+        type,
+        pubkeys: p2air.pubkeys,
+        signatures: p2air.pubkeys!.map((): undefined => undefined),
+        maxSignatures: 3,
+      };
+    }
+
     case SCRIPT_TYPES.P2MS: {
       const p2ms = payments.p2ms({ output: script });
       return {
@@ -674,6 +766,7 @@ function prepareInput(
   ourPubKey: Buffer,
   redeemScript?: Buffer,
   witnessScript?: Buffer,
+  vaultTxType?: payments.VaultTxType,
 ): TxbInput {
   if (redeemScript && witnessScript) {
     const p2wsh = payments.p2wsh({
@@ -722,6 +815,7 @@ function prepareInput(
       pubkeys: expanded.pubkeys,
       signatures: expanded.signatures,
       maxSignatures: expanded.maxSignatures,
+      vaultTxType,
     };
   }
 
@@ -900,6 +994,43 @@ function build(
 
       return payments.p2pk({ signature: signatures[0] });
     }
+    case SCRIPT_TYPES.P2AR: {
+      const m = input.vaultTxType === VaultTxType.Alert ? 1 : 2;
+      if (allowIncomplete) {
+        signatures = signatures.map(x => x || ops.OP_0);
+      } else {
+        signatures = signatures.filter(x => x);
+      }
+
+      // if the transaction is not not complete (complete), or if signatures.length === m, validate
+      // otherwise, the number of OP_0's may be >= m, so don't validate (boo)
+      const validate = !allowIncomplete || m === signatures.length;
+      return payments.p2ar(
+        { m, pubkeys, signatures, vaultTxType: input.vaultTxType },
+        { allowIncomplete, validate },
+      );
+    }
+    case SCRIPT_TYPES.P2AIR: {
+      const m =
+        input.vaultTxType === VaultTxType.Alert
+          ? 1
+          : input.vaultTxType === VaultTxType.Instant
+          ? 2
+          : 3;
+      if (allowIncomplete) {
+        signatures = signatures.map(x => x || ops.OP_0);
+      } else {
+        signatures = signatures.filter(x => x);
+      }
+
+      // if the transaction is not not complete (complete), or if signatures.length === m, validate
+      // otherwise, the number of OP_0's may be >= m, so don't validate (boo)
+      const validate = !allowIncomplete || m === signatures.length;
+      return payments.p2air(
+        { m, pubkeys, signatures, vaultTxType: input.vaultTxType },
+        { allowIncomplete, validate },
+      );
+    }
     case SCRIPT_TYPES.P2MS: {
       const m = input.maxSignatures;
       if (allowIncomplete) {
@@ -1049,6 +1180,50 @@ function checkSignArgs(inputs: TxbInput[], signParams: TxbSignArg): void {
         `${posType} requires witnessValue`,
       );
       break;
+    case 'p2ar':
+      if (prevOutType && prevOutType !== 'vaultar') {
+        throw new TypeError(
+          `input #${signParams.vin} is not of type p2ar: ${prevOutType}`,
+        );
+      }
+      tfMessage(
+        typeforce.value(undefined),
+        signParams.witnessScript,
+        `${posType} requires NO witnessScript`,
+      );
+      tfMessage(
+        typeforce.value(undefined),
+        signParams.redeemScript,
+        `${posType} requires NO redeemScript`,
+      );
+      tfMessage(
+        typeforce.value(undefined),
+        signParams.witnessValue,
+        `${posType} requires NO witnessValue`,
+      );
+      break;
+    case 'p2air':
+      if (prevOutType && prevOutType !== 'vaultair') {
+        throw new TypeError(
+          `input #${signParams.vin} is not of type p2air: ${prevOutType}`,
+        );
+      }
+      tfMessage(
+        typeforce.value(undefined),
+        signParams.witnessScript,
+        `${posType} requires NO witnessScript`,
+      );
+      tfMessage(
+        typeforce.value(undefined),
+        signParams.redeemScript,
+        `${posType} requires NO redeemScript`,
+      );
+      tfMessage(
+        typeforce.value(undefined),
+        signParams.witnessValue,
+        `${posType} requires NO witnessValue`,
+      );
+      break;
     case 'p2ms':
       if (prevOutType && prevOutType !== 'multisig') {
         throw new TypeError(
@@ -1093,6 +1268,8 @@ function checkSignArgs(inputs: TxbInput[], signParams: TxbSignArg): void {
         `${posType} requires witnessValue`,
       );
       break;
+    case 'p2sh-p2ar':
+    case 'p2sh-p2air':
     case 'p2sh-p2ms':
     case 'p2sh-p2pk':
     case 'p2sh-p2pkh':
@@ -1117,6 +1294,8 @@ function checkSignArgs(inputs: TxbInput[], signParams: TxbSignArg): void {
         `${posType} requires NO witnessValue`,
       );
       break;
+    case 'p2wsh-p2ar':
+    case 'p2wsh-p2air':
     case 'p2wsh-p2ms':
     case 'p2wsh-p2pk':
     case 'p2wsh-p2pkh':
@@ -1141,6 +1320,8 @@ function checkSignArgs(inputs: TxbInput[], signParams: TxbSignArg): void {
         `${posType} requires witnessValue`,
       );
       break;
+    case 'p2sh-p2wsh-p2ar':
+    case 'p2sh-p2wsh-p2air':
     case 'p2sh-p2wsh-p2ms':
     case 'p2sh-p2wsh-p2pk':
     case 'p2sh-p2wsh-p2pkh':

@@ -1,5 +1,6 @@
 import { Signer } from './ecpair';
 import { Network } from './networks';
+import * as payments from './payments';
 import { Transaction } from './transaction';
 interface TxbSignArg {
     prevOutScriptType: string;
@@ -9,11 +10,12 @@ interface TxbSignArg {
     hashType?: number;
     witnessValue?: number;
     witnessScript?: Buffer;
+    vaultTxType?: payments.VaultTxType;
 }
 export declare class TransactionBuilder {
     network: Network;
     maximumFeeRate: number;
-    static fromTransaction(transaction: Transaction, network?: Network): TransactionBuilder;
+    static fromTransaction(transaction: Transaction, network?: Network, vaultTxType?: payments.VaultTxType): TransactionBuilder;
     private __PREV_TX_SET;
     private __INPUTS;
     private __TX;
@@ -22,7 +24,7 @@ export declare class TransactionBuilder {
     setLowR(setting?: boolean): boolean;
     setLockTime(locktime: number): void;
     setVersion(version: number): void;
-    addInput(txHash: Buffer | string | Transaction, vout: number, sequence?: number, prevOutScript?: Buffer): number;
+    addInput(txHash: Buffer | string | Transaction, vout: number, sequence?: number, prevOutScript?: Buffer, vaultTxType?: payments.VaultTxType): number;
     addOutput(scriptPubKey: string | Buffer, value: number): number;
     build(): Transaction;
     buildIncomplete(): Transaction;
