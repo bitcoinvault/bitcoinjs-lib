@@ -827,6 +827,75 @@ for (const useOldSignArgs of [false, true]) {
         }, new RegExp('Transaction has absurd fees'));
       });
 
+      it('should generate same txHex for Alert from P2SH-P2WSH-P2AR', () => {
+        const rawtx =
+          '020000000001016cbf3ea06c01f8229dd66905acad5b81ba34b0ab4c15017dd365cdffcd0f' +
+          '98ad000000002322002001bdd18a9abdaf495a168a926a7f6f699512c29c9c571f5396d9582885ae8039fe' +
+          'ffffff02d4f479d70300000017a914913cf6fe42de761b95182ce7445387aed15e183c8700ca9a3b000000' +
+          '0017a914ed4a61788e8aaa9eca2a7bd35f5c648c19129c9887040047304402202de69f00ab58867789dd45' +
+          '9351a2c1187f5721fed8551be8247f8b86792fa885022060b2f497c5af78dafe345144583029c3e71f4340' +
+          '2867dde8dfb4e0c1d939101b0101014b6351675268210359c52daa5493a48aad1edb160ee5c23e29359e78' +
+          '2c99c93e10121dc2058fd9862102ecec100acb89f3049285ae01e7f03fb469e6b54d44b0f3c8240b1958e8' +
+          '93cb8c52aec8000000';
+        const txb = TransactionBuilder.fromTransaction(
+          Transaction.fromHex(rawtx),
+        );
+        assert.strictEqual(
+          (txb as any).__INPUTS[0].witnessScriptType,
+          'vaultar',
+        );
+        const txHex = txb.build().toHex();
+        assert.strictEqual(rawtx, txHex);
+      });
+
+      it('should generate same txHex for Recovery transaction from P2SH-P2WSH-P2AR', () => {
+        const rawtx =
+          '020000000001011d84f349440fabade87eb94afcd151c484f49447bf5cd685b7958075ede4f' +
+          '0ab0000000023220020b6179e3c8bce2cb712db7634fb092263b63996c40157adeee38ddc15c2aa3efdffff' +
+          'ffff01e8be1413040000001600140abcb8047580a93a687296c431a741f74a7a2a670500473044022038f1c' +
+          '38404248b0ac2c710972f3312326c2c104068c00b69a2d37dfb722b9d710220557702f41c0bb0b2a0ecbd2d' +
+          '30a0285ab870b33e04cd83c867fa76f5c26d579a0147304402203c9f81c4d323bd2c3c2a200edc714939307' +
+          '48bcb9abb4d793fd87581ef200c6202202d59d4defd002f926177ef7614c07042d515804986c2a9b762d85b' +
+          '7f9435355b01004b63516752682103c376b541211de6464f4f408f723468ca75097564c3d95c88652b25dd3' +
+          'af52d2e2102ecec100acb89f3049285ae01e7f03fb469e6b54d44b0f3c8240b1958e893cb8c52ae00000000';
+        const txb = TransactionBuilder.fromTransaction(
+          Transaction.fromHex(rawtx),
+          network,
+          payments.VaultTxType.Recovery,
+        );
+        assert.strictEqual(
+          (txb as any).__INPUTS[0].witnessScriptType,
+          'vaultar',
+        );
+        const txHex = txb.build().toHex();
+        assert.strictEqual(rawtx, txHex);
+      });
+
+      it('should generate same txHex for Instant transaction from P2SH-P2WSH-P2AIR', () => {
+        const rawtx =
+          '020000000001016048596f0701c64f9b302ee9f0acad99e80371c94cd14a4bab879e020dcc74a' +
+          '2000000002322002091c7f9704286983654884d57ae281855b3d9c3d9f5944dfa2ddf1314a867ed18feffff' +
+          'ff0200ca9a3b000000001600140abcb8047580a93a687296c431a741f74a7a2a67ccf279d70300000017a91' +
+          '46f7076838fba332389d574d31143f1179735a25c87060047304402200c94b5515fd7dc6a38908dcfd48875' +
+          'e3b13b6ea4483d088bfa6585eed4dc49d7022030b5259174d565d3f8606cb1543554418e460121fe1960c89' +
+          '40114165fddbecf01473044022027939d4b12079a862803521b24ec29b1656cc5b89ff4d88454c86ad4f5e5' +
+          'b25302201cc58a56d92c4dfaeeb8b216d106474eb8184c7ee4cdb16411f739c17c6b796d010101007163516' +
+          '7635267536868210288413a72e558c1f8137e1da6a8407a016a2991070ebbc197a2a1a3fef9fb22f42102ec' +
+          'ec100acb89f3049285ae01e7f03fb469e6b54d44b0f3c8240b1958e893cb8c210263451a52f3d3ae6918969' +
+          'e1c5ce934743185578481ef8130336ad1726ba61ddb53aeca000000';
+        const txb = TransactionBuilder.fromTransaction(
+          Transaction.fromHex(rawtx),
+          network,
+          payments.VaultTxType.Instant,
+        );
+        assert.strictEqual(
+          (txb as any).__INPUTS[0].witnessScriptType,
+          'vaultair',
+        );
+        const txHex = txb.build().toHex();
+        assert.strictEqual(rawtx, txHex);
+      });
+
       it('should classify witness inputs with witness = true during multisigning', () => {
         const innerKeyPair = ECPair.fromWIF(
           'cRAwuVuVSBZMPu7hdrYvMCZ8eevzmkExjFbaBLhqnDdrezxN3nTS',
